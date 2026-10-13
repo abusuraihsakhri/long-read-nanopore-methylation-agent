@@ -107,7 +107,18 @@ def main(argv=None):
                     is_critical_flag=str(r.get("is_critical_flag", "")).lower() in ("true", "1", "yes"),
                 )
                 dossier = coordinator.process(payload)
-                row_dict = dict(r)
+                def spreadsheet_safe(value):
+                    import re
+                    if not isinstance(value, str):
+                        return value
+                    trimmed = value.lstrip()
+                    if trimmed.startswith(("=", "+", "-", "@")) and not re.fullmatch(
+                        r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?", trimmed
+                    ):
+                        return "'" + value
+                    return value
+
+                row_dict = {key: spreadsheet_safe(value) for key, value in r.items()}
                 row_dict["overall_status"] = dossier["overall_status"]
                 row_dict["total_alerts"] = dossier["total_alerts"]
                 row_dict["critical_count"] = dossier["critical_count"]

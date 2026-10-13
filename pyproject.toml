@@ -27,5 +27,9 @@ dependencies = [
 long-read-nanopore-methylation-engine = "nanomethyl_sentinel.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/abusuraihsakhri/long-read-nanopore-methylation-engine"
+Homepage = "https://github.com/abusuraihsakhri/long-read-nanopore-methylation-agent"
 Repository = "https://github.com/abusuraihsakhri/long-read-nanopore-methylation-agent.git"
+
+[tool.setuptools]
+packages = ["agents", "nanomethyl_sentinel"]
+py-modules = ["cli", "enrichment", "simulator", "nanomethyl_sentinel_app"]

@@ -1,124 +1,60 @@
 # Long Read Nanopore Methylation Agent
 
-> **Domain:** Clinical Decision Support & Biomedical Computing  
-> **Reference Guidelines & Standards:** `Standard Clinical Formulations & ISO/IEC Quality Frameworks`
+This repository contains two separate Python **demonstration threshold-evaluation workflows** and a static **modkit bedMethyl summarizer**. The browser tool aggregates existing nanopore base-modification calls; it does **not** infer methylation from raw current traces.
 
-<div align="center">
+## Browser application
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
+Open [web/index.html](web/index.html) in a modern browser or serve the repository's root directory with a static HTTP server. GitHub Pages can serve the root [index.html](index.html) (which redirects to the application). Files remain on the local device; the browser does not upload or transmit the data.
 
-</div>
+1. Generate an 18-column, uncompressed bedMethyl file using `modkit pileup`.
+2. Choose the file, modification code (`m` = 5mC, `h` = 5hmC), and minimum valid coverage.
+3. Select **Analyze file**; review per-chromosome/per-code counts and export summary CSV.
+4. **Try example** works without an input file.
 
----
+The tool accepts UTF-8 tab-separated, 18-column `modkit pileup` bedMethyl files up to 20 MiB. It checks 0-based BED coordinates, integer counts, and the per-row reported modified fraction. Invalid records are counted and skipped, and warnings show up to five errors.
 
-## 📖 What It Does
+**Computation:** For each chromosome and modification code, the reported percentage is `100 × sum(N_mod) / sum(N_valid_cov)` after filtering. Counts for 5mC and 5hmC are never pooled because their coverage can overlap. Input columns follow the [official modkit pileup specification](https://nanoporetech.github.io/modkit/intro_pileup.html). This is a descriptive, **not differential**, summary and is not a clinical assay or validated diagnostic model.
 
-**Long Read Nanopore Methylation Agent** is an advanced analytical and computational platform implementing Oxford Nanopore raw squiggle current deviation 5mC/5hmC methylation agent.
+## Python workflows
 
----
+The root [cli.py](cli.py) uses `agents/` for generic threshold auditing (25.0 for primary, 12.0 for secondary, or explicit critical flag), a keyword-based descriptor check, an in-memory HMAC audit trail, CSV batch processing, and a FastAPI server.
 
-## ⚙️ Key Capabilities & Algorithmic Modules
-
-- **Deterministic Calculation Engine**: Strict compliance with standard reference formulations and thresholds.
-- **Risk & Urgency Classification**: Multi-tier categorization with automated clinical/operational action recommendations.
-- **Validation & Guardrails**: Rigorous input bounds checking and anomaly detection.
-
----
-
-## 💻 CLI Quickstart & Usage
-
-### 1. Single Task Evaluation
 ```bash
-python cli.py audit --task-id TASK-001 --target KEY-01 --primary 28.5 --secondary 14.2 --critical --status DISCORDANT
-```
-
-### 2. Supervisory Chat Query
-```bash
-python cli.py chat "What is the system status?"
-```
-
-### 3. Batch CSV Processing
-```bash
+python -m pip install -e . pytest
+python cli.py audit --task-id TASK-001 --target TARGET-01 --primary 28.5 --secondary 14.2 --critical --status DISCORDANT
 python cli.py batch -i sample.csv -o results.csv
-```
-
-### 4. Verify Audit Trail Integrity
-```bash
 python cli.py verify-audit
-```
-
-### 5. Launch REST API Server
-```bash
 python cli.py serve --host 127.0.0.1 --port 8000
 ```
 
-### Parameter Reference
-- `--task-id`: Unique task/case identifier (required, max 128 chars).
-- `--target`: Target identifier (required, max 256 chars).
-- `--primary`: Primary measurement value (float, required).
-- `--secondary`: Secondary metric (float, default 0.0).
-- `--critical`: Flag for critical/emergency escalation.
-- `--status`: Status descriptor (default "NOMINAL", max 128 chars).
-- `-i/--input`: Input CSV file path for batch mode (must be within project directory).
-- `-o/--output`: Output CSV file path for batch mode (must be within project directory).
-
-### Input Data Schema
-
-| Field | Type | Description | Requirement |
-|:------|:-----|:------------|:------------|
-| `task_id` | string | Unique task / case identifier | Required, max 128 chars |
-| `target_identifier` | string | Entity, patient key, or genomic target | Required, max 256 chars |
-| `primary_metric` | float | Primary domain measurement or score | Required |
-| `secondary_metric` | float | Secondary kinetic or confidence score | Optional (default 0.0) |
-| `is_critical_flag` | boolean | Emergency escalation trigger | Optional (default false) |
-| `status_descriptor` | string | Status code or phenotype descriptor | Optional (default "NOMINAL") |
-
----
-
-## 🛡️ Security & Enterprise Architecture
-
-* **Zero-PHI Outbound Interceptor:** Active regex inspection blocking SSNs, MRNs, phone numbers, emails, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
-* **Secure Key Management:** HMAC audit key sourced from `AUDIT_SECRET_KEY` environment variable; generates a cryptographically secure random key at runtime if not set (with warning).
-* **Path Traversal Protection:** Batch CLI validates that input/output file paths remain within the project working directory.
-* **Input Validation:** All string fields are stripped, length-limited, and checked for path traversal attempts.
-* **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances, Claude, OpenAI, and deterministic test mocks.
-* **Active Learning Bayesian Calibration:** Dynamic tracker updating worker reliability weights.
-* **FastAPI & Prometheus Telemetry:** Exposes REST endpoints and operational Prometheus metrics (`/metrics`).
-
-### Environment Variables
-
-| Variable | Description | Default |
-|:---------|:------------|:--------|
-| `AUDIT_SECRET_KEY` | Secret key for HMAC-SHA256 audit trail signing | Random ephemeral key (not persisted) |
-| `MODEL_PROVIDER` | LLM provider (`mock`, `ollama`, `claude`, `openai`) | `mock` |
-
----
-
-## 🧪 Testing & Verification
-
-Run the automated test suite:
+The independent `nanomethyl_sentinel/` package has its own CLI, data model, and three threshold evaluators (primary 25.0, secondary 10.0). Launch with:
 
 ```bash
-pytest -v
+python -m nanomethyl_sentinel.cli audit --primary 29.4 --secondary 15.1
 ```
 
-Execute high-throughput batch simulation benchmarks:
+The REST server from `python cli.py serve` exposes `/health`, `/metrics`, `/api/audit`, `/api/chat`, and `/api/audit/logs`. The `/metrics` endpoint responds in JSON, not the Prometheus text format. These APIs have **no authentication** and should only be exposed to trusted networks. The LLM factory currently returns deterministic mock responses for every provider selection.
+
+The separate [enrichment.py](enrichment.py) module provides generic threshold simulations named for methylation tasks. It does not implement the biological workflows implied by those names.
+
+## Tests
 
 ```bash
-python simulator.py --tasks 1000 --concurrency 8
+python -m pytest -v
+node --test tests/test_bedmethyl.cjs
 ```
 
----
+GitHub Actions tests Python 3.10–3.12 and Node 22. The Python package requires Python 3.9+ and Pydantic v2, FastAPI, and Uvicorn. The browser tool requires a current JavaScript-enabled browser; no Python runtime, Pyodide, or backend service is needed for its calculations.
 
-## 🐳 Container Deployment
+## Security and privacy
 
-```bash
-docker build -t long-read-nanopore-methylation-agent .
-docker run -p 8000:8000 long-read-nanopore-methylation-agent
-```
+- The browser analyzer performs local-only file parsing and creates client-side CSV downloads. A Google Font or telemetry service is **not** required.
+- The Python audit trail uses HMAC-SHA256 with chain links. It is **process-local** and is not a persistent audit log. Set a private `AUDIT_SECRET_KEY` environment variable to keep a consistent key between process restarts, but note that stored records themselves are not persisted.
+- The Python PHI guard uses heuristic regular expressions; it **cannot guarantee de-identification**. Do not submit patient-identifying data to the API or place the API on the public Internet.
+- `docker compose up --build` requires `AUDIT_SECRET_KEY` to be set, for example as an exported shell environment variable. Do not commit a real key or store it in a publicly accessible frontend.
+
+## Project status
+
+This is research/development demonstration software. There is no validated nanopore squiggle basecaller, differential methylation pipeline, or regulatory/clinical conformity claim. The static browser summarizer and Python threshold agents are intentionally distinct implementations.
+
+Licensed under [MIT](LICENSE).

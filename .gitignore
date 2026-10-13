@@ -39,3 +39,8 @@ output.csv
 
 # Test temp files
 _test_batch_*.csv
+
+# Environment secrets
+.env
+.env.*
+!.env.example

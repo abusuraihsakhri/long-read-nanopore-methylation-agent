@@ -1,236 +1,119 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Long Read Nanopore Methylation Engine — Operations Console</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #090d16;
-            --card: #111827;
-            --border: #1f293d;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.25);
-            --text: #f3f4f6;
-            --text-muted: #9ca3af;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding: 2rem;
-            min-height: 100vh;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .header-title h1 { font-size: 1.6rem; font-weight: 700; color: #fff; }
-        .header-title p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; }
-        .badge {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: var(--accent-glow);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 1.5rem;
-        }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        .card h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-        input, select, textarea {
-            width: 100%;
-            padding: 0.65rem 0.9rem;
-            background: #0d1322;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.9rem;
-        }
-        input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-        .btn {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 0.7rem 1.4rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
-        }
-        .btn:hover { background: #2563eb; }
-        .terminal {
-            background: #060911;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: #10b981;
-            height: 380px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-        .metrics-bar {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .metric-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-        }
-        .metric-val { font-size: 1.4rem; font-weight: 700; color: #fff; margin-top: 0.25rem; }
-        .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>NanoMethyl · bedMethyl Summary</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#e8edf6;background:#0b1220}
+*{box-sizing:border-box}body{margin:0;padding:clamp(16px,3vw,38px);max-width:1140px;margin-inline:auto;line-height:1.5}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+h1{font-size:clamp(1.6rem,3vw,2.2rem);margin:0}h2{font-size:1.15rem;margin:0 0 14px}p{margin:8px 0;color:#b9c5d6}
+.chip{border:1px solid #3d5b75;border-radius:999px;color:#93d5f6;padding:4px 11px;font-size:.8rem}
+.panel{background:#131f31;border:1px solid #30405a;border-radius:12px;padding:clamp(16px,2vw,24px);margin-bottom:16px}
+.controls{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;align-items:end}label{display:block;color:#c9d6e7;font-size:.9rem}
+input,select{width:100%;background:#0b1220;border:1px solid #4c6180;color:#fff;padding:11px;border-radius:6px;margin-top:5px;font:inherit}
+input[type=file]{max-width:100%}input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #79d0ff;outline-offset:3px}
+.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}button{border:1px solid #6daedb;border-radius:7px;background:#175e97;color:#fff;font:inherit;font-weight:600;padding:10px 16px;cursor:pointer}
+button.secondary{background:transparent}button:hover:not(:disabled){filter:brightness(1.15)}button:disabled{opacity:.5;cursor:not-allowed}
+.note{font-size:.88rem;color:#b9c5d6}.status{min-height:24px;color:#a9e2fe}.error{color:#ffb7b7}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}.stat{border:1px solid #30405a;border-radius:7px;padding:12px;background:#101a2a}.stat strong{font-size:1.5rem;display:block}.stat small{color:#b9c5d6}
+.table-scroll{overflow:auto}table{border-collapse:collapse;width:100%;font-size:.9rem}th,td{text-align:left;border-bottom:1px solid #32425c;padding:10px 12px;white-space:nowrap}th{color:#cbd7e9;background:#1a2b40}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+ul{padding-left:20px;color:#eecda0}a{color:#99d7ff}@media(max-width:740px){.controls{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
 </head>
 <body>
-
-    <div class="header">
-        <div class="header-title">
-            <h1>Long Read Nanopore Methylation Engine</h1>
-            <p>Domain: Clinical & Cryptographic AI | Standard: CAP / CLSI / NIST Standards | LabMind-Atlas Architecture</p>
-        </div>
-        <div>
-            <span class="badge">Air-Gapped Active</span>
-            <span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">Zero-PHI Guard Active</span>
-        </div>
-    </div>
-
-    <div class="metrics-bar">
-        <div class="metric-box">
-            <div class="metric-label">System Status</div>
-            <div class="metric-val" style="color: var(--success);" id="m-status">OPTIMAL</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Tasks Processed</div>
-            <div class="metric-val" id="m-tasks">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Audit Blocks Signed</div>
-            <div class="metric-val" id="m-audit">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">PHI Interceptions</div>
-            <div class="metric-val" style="color: var(--accent);" id="m-phi">0</div>
-        </div>
-    </div>
-
-    <div class="grid">
-        <div class="card">
-            <h2>⚙️ Dispatch Distributed Component Audit</h2>
-            <div class="form-group">
-                <label>Task / Sample ID</label>
-                <input type="text" id="task_id" value="TASK-2026-LIVE-01">
-            </div>
-            <div class="form-group">
-                <label>Target Identifier</label>
-                <input type="text" id="target_id" value="SPECIMEN-ALPHA-77">
-            </div>
-            <div class="form-group">
-                <label>Primary Measurement / Value</label>
-                <input type="number" id="primary_metric" value="29.4" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Secondary Metric / Kinetic Index</label>
-                <input type="number" id="secondary_metric" value="14.8" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Status / Phenotype Descriptor</label>
-                <input type="text" id="status_descriptor" value="DISCORDANT_ANOMALY">
-            </div>
-            <div class="form-group">
-                <label><input type="checkbox" id="is_critical" checked> Trigger Emergency / Critical Flag</label>
-            </div>
-            <button class="btn" onclick="runAudit()">Execute Distributed Component Audit</button>
-        </div>
-
-        <div class="card">
-            <h2>📊 Real-Time Consensus Dossier & Audit Log</h2>
-            <div class="terminal" id="outputConsole">// Long Read Nanopore Methylation Engine Operations Console Ready
-// Connection established with Air-Gapped Supervisor
-// Cryptographic HMAC-SHA256 audit ledger loaded.
-// Ready for live task payload dispatch...</div>
-        </div>
-    </div>
-
-    <script>
-        async function runAudit() {
-            const consoleEl = document.getElementById('outputConsole');
-            consoleEl.innerText = "// Dispatching task across specialized workers...
-// Invoking InvariantQCWorker, SafetyEscalationWorker, ProtocolWorker...";
-
-            const payload = {
-                task_id: document.getElementById('task_id').value,
-                target_identifier: document.getElementById('target_id').value,
-                primary_metric: parseFloat(document.getElementById('primary_metric').value),
-                secondary_metric: parseFloat(document.getElementById('secondary_metric').value),
-                status_descriptor: document.getElementById('status_descriptor').value,
-                is_critical_flag: document.getElementById('is_critical').checked
-            };
-
-            try {
-                const res = await fetch('/api/audit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                consoleEl.innerText = JSON.stringify(data, null, 2);
-                document.getElementById('m-tasks').innerText = parseInt(document.getElementById('m-tasks').innerText) + 1;
-                document.getElementById('m-audit').innerText = parseInt(document.getElementById('m-audit').innerText) + 1;
-            } catch (err) {
-                consoleEl.innerText = "// Offline / Simulation Output:\n" + JSON.stringify({
-                    dossier_id: "DOSSIER-SIM-" + Math.floor(Math.random()*10000),
-                    system: "long-read-nanopore-methylation-engine",
-                    domain: "Clinical & Cryptographic AI",
-                    task_id: payload.task_id,
-                    overall_urgency: payload.is_critical_flag ? "CRITICAL_STAT_PANIC" : "ELEVATED_RISK",
-                    integrity_status: "DISCORDANT_ANOMALY",
-                    alerts: [
-                        { worker: "InvariantQCWorker", alert: "Primary metric exceeds upper reference bound" },
-                        { worker: "SafetyEscalationWorker", alert: "Critical emergency interlock flag active" }
-                    ],
-                    audit_hash: "HMAC_SHA256_e83f9a72b941d6c381f9"
-                }, null, 2);
-            }
-        }
-    </script>
+<header><div><h1>NanoMethyl · bedMethyl Summary</h1><p>Coverage-weighted nanopore modification summaries from <code>modkit pileup</code> data.</p></div><span class="chip">Local processing · no upload</span></header>
+<main>
+<section class="panel" aria-labelledby="input-head">
+<h2 id="input-head">Input</h2>
+<div class="controls">
+<label>modkit bedMethyl (18-column, uncompressed UTF-8)
+<input type="file" id="file" accept=".bed,.bedmethyl,.tsv,.txt,text/plain"></label>
+<label>Modification code
+<select id="mod"><option value="m">m · 5mC</option><option value="h">h · 5hmC</option><option value="all">All · separate by code</option></select></label>
+<label>Minimum valid coverage
+<input id="coverage" type="number" min="1" max="1000000" step="1" value="5"></label>
+</div>
+<div class="buttons"><button id="analyze" type="button">Analyze file</button><button id="sample" class="secondary" type="button">Try example</button><button id="download" class="secondary" type="button" disabled>Export CSV</button></div>
+<p class="note">A maximum 20 MiB text file is supported. Counts from distinct modification codes are never pooled. Percentages are calculated from summed modified calls ÷ summed valid coverage, not the mean of site percentages.</p>
+<p id="status" class="status" role="status" aria-live="polite">Choose a file or try the example.</p>
+</section>
+<section class="panel" aria-labelledby="results-head">
+<h2 id="results-head">Results</h2>
+<div class="stats">
+<div class="stat"><strong id="sites">—</strong><small>Accepted sites</small></div>
+<div class="stat"><strong id="groups">—</strong><small>Chromosome/code groups</small></div>
+<div class="stat"><strong id="filtered">—</strong><small>Filtered records</small></div>
+<div class="stat"><strong id="malformed">—</strong><small>Invalid records</small></div>
+</div>
+<div class="table-scroll"><table><thead><tr><th scope="col">Chromosome</th><th scope="col">Modification</th><th class="num" scope="col">Sites</th><th class="num" scope="col">Valid calls</th><th class="num" scope="col">Modified calls</th><th class="num" scope="col">Modified %</th></tr></thead><tbody id="rows"><tr><td colspan="6">No analysis yet.</td></tr></tbody></table></div>
+<ul id="warnings" aria-live="polite"></ul>
+</section>
+<section class="panel" aria-labelledby="method-head">
+<h2 id="method-head">Scope and interpretation</h2>
+<p>This is a <strong>descriptive pileup summarizer</strong>. It does not call modifications from raw nanopore signals, identify differential methylation, phase reads, or make clinical decisions. The server-side Python agents in this repository are separate demonstration threshold evaluators.</p>
+<p>Input coordinates are 0-based and end-exclusive. Summaries are grouped by chromosome and modification code; a 5mC row and a 5hmC row may describe overlapping read coverage and must not be added together.</p>
+<p class="note">Input definition: <a href="https://nanoporetech.github.io/modkit/intro_pileup.html" target="_blank" rel="noopener noreferrer">Official modkit pileup documentation</a>. No data are sent to this website's server. Avoid public analysis of identifying specimen metadata.</p>
+</section>
+</main>
+<script src="./bedmethyl.js"></script>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const sample = [
+"chr1\t100\t101\tm\t10\t+\t100\t101\t255,0,0\t10\t60.00\t6\t3\t1\t0\t0\t0\t0",
+"chr1\t110\t111\tm\t20\t+\t110\t111\t255,0,0\t20\t25.00\t5\t15\t0\t0\t0\t0\t0",
+"chr2\t200\t201\th\t8\t+\t200\t201\t255,0,0\t8\t50.00\t4\t4\t0\t0\t0\t0\t0"
+].join("\n");
+let current = null;
+function render(result) {
+  current = result;
+  $("sites").textContent = result.accepted.toLocaleString();
+  $("groups").textContent = result.summary.length.toLocaleString();
+  $("filtered").textContent = result.filtered.toLocaleString();
+  $("malformed").textContent = result.malformed.toLocaleString();
+  const body = $("rows"); body.replaceChildren();
+  for (const r of result.summary.slice(0, 250)) {
+    const tr = document.createElement("tr");
+    for (const value of [r.chromosome,r.modification,r.sites,r.validCoverage,r.modifiedCalls,r.percentModified.toFixed(2)+"%"]) {
+      const td = document.createElement("td"); td.textContent = value; tr.append(td);
+    }
+    body.append(tr);
+  }
+  if (!result.summary.length) {
+    const tr = document.createElement("tr"), td = document.createElement("td");
+    td.colSpan=6;td.textContent="No matching valid records.";tr.append(td);body.append(tr);
+  }
+  $("warnings").replaceChildren();
+  for (const w of result.warnings) { const li=document.createElement("li");li.textContent=w;$("warnings").append(li); }
+  $("download").disabled = !result.summary.length;
+  $("status").className = "status";
+  $("status").textContent = result.accepted + " records included; " + result.parsed +
+    " valid records parsed. " + (result.summary.length > 250 ? "Showing first 250 groups; CSV contains all groups." : "");
+}
+function analyze(text) {
+  try { render(BedMethyl.parse(text,{modification:$("mod").value,minimumCoverage:$("coverage").value})); }
+  catch(e){current=null;$("download").disabled=true;$("status").className="status error";$("status").textContent=e.message;}
+}
+$("analyze").addEventListener("click",async()=>{
+  const file=$("file").files[0];
+  if(!file){$("status").className="status error";$("status").textContent="Select a bedMethyl file first.";return;}
+  if(file.size>20*1024*1024){$("status").className="status error";$("status").textContent="File exceeds 20 MiB limit.";return;}
+  $("analyze").disabled=true;$("status").textContent="Reading file locally…";
+  try {analyze(await file.text());}
+  catch(e){$("status").className="status error";$("status").textContent="Unable to read file: "+e.message;}
+  finally{$("analyze").disabled=false;}
+});
+$("sample").addEventListener("click",()=>{ $("coverage").value="5";$("mod").value="all";analyze(sample); });
+$("download").addEventListener("click",()=>{
+  if(!current || !current.summary.length)return;
+  const blob=new Blob([BedMethyl.toCSV(current.summary)],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="bedmethyl-summary.csv";document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+</script>
 </body>
 </html>

@@ -12,7 +12,7 @@ supervisor = SystemSupervisor(model_provider="mock")
 
 app = FastAPI(
     title="Long Read Nanopore Methylation Agent API",
-    description="Enterprise Distributed Component Platform (Clinical & Biomedical AI)",
+    description="Demonstration threshold evaluation and in-memory audit",
     version="3.0.0-ENTERPRISE",
 )
 
@@ -23,7 +23,7 @@ class ChatRequest(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "HEALTHY", "service": "long-read-nanopore-methylation-agent", "domain": "Clinical & Biomedical AI", "standard": "CAP / CLSI / ISO Standards", "version": "3.0.0-ENTERPRISE"}
+    return {"status": "HEALTHY", "service": "long-read-nanopore-methylation-agent", "domain": "Clinical & Biomedical AI", "standard": "Repository demonstration thresholds (not validated)", "version": "3.0.0-ENTERPRISE"}
 
 
 @app.get("/metrics")

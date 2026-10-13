@@ -93,7 +93,7 @@ class NanoMethylCoordinator:
             "critical_count": crit_count,
             "warning_count": warn_count,
             "alerts": [a.to_dict() for a in all_alerts],
-            "standard_specification": "Oxford Nanopore Epigenomic Modification Specs",
+            "standard_specification": "Demonstration thresholds (not a validated ONT specification)",
             "consensus_summary": f"Consensus evaluation completed across 3 sub-agents with status [{status.value}].",
         }
 
@@ -105,6 +105,6 @@ class NanoMethylCoordinator:
         if "status" in q or "ledger" in q:
             return f"NanoMethyl Sentinel: 5mC / 5hmC Oxford Nanopore Current Trace Agent currently managing {len(self.execution_ledger)} execution tasks in air-gapped memory."
         elif "standard" in q or "spec" in q:
-            return "Active runtime operating strictly according to Oxford Nanopore Epigenomic Modification Specs specifications."
+            return "This runtime uses demonstration thresholds, not validated nanopore methylation specifications."
         else:
             return f"NanoMethyl Sentinel: 5mC / 5hmC Oxford Nanopore Current Trace Agent executive coordinator online. Zero-telemetry on-premises surveillance active."

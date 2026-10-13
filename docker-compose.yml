@@ -5,7 +5,7 @@ services:
     build: .
     container_name: long-read-nanopore-methylation-engine
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       - AUDIT_SECRET_KEY=${AUDIT_SECRET_KEY:?Set AUDIT_SECRET_KEY to a private random value}
       - MODEL_PROVIDER=mock

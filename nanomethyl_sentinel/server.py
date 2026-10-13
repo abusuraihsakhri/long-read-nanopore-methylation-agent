@@ -15,7 +15,7 @@ def create_app():
 
         app = FastAPI(
             title="NanoMethyl Sentinel: 5mC / 5hmC Oxford Nanopore Current Trace Agent",
-            description="Identifies 5-methylcytosine (5mC) modifications from Oxford Nanopore raw squiggle event currents and computes regional CpG methylation levels.",
+            description="Demonstration threshold evaluator; does not call modifications from raw nanopore current or calculate CpG methylation.",
             version="2.0.0-FRONTIER",
         )
 

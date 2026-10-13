@@ -53,7 +53,7 @@ def main(argv=None):
         dossier = coordinator.process(payload)
         print("=" * 80)
         print(f"  NANOMETHYL SENTINEL: 5MC / 5HMC OXFORD NANOPORE CURRENT TRACE AGENT")
-        print(f"  Domain: Biomedical Scientific Discovery & Multi-Omics | Standard: Oxford Nanopore Epigenomic Modification Specs")
+        print(f"  Domain: Biomedical Scientific Discovery & Multi-Omics | Standard: Repository demonstration thresholds (not validated)")
         print(f"  Task: {dossier['task_id']} | Status: [{dossier['overall_status']}] | Total Alerts: {dossier['total_alerts']}")
         print("=" * 80)
         for a in dossier["alerts"]:

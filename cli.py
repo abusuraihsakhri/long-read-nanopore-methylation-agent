@@ -74,7 +74,7 @@ def main(argv=None):
         dossier = supervisor.process_task(payload)
         print("=" * 80)
         print(f"  LONG READ NANOPORE METHYLATION AGENT")
-        print(f"  Domain: Clinical & Biomedical AI | Standard: CAP / CLSI / ISO Standards")
+        print(f"  Domain: Clinical & Biomedical AI | Standard: Repository demonstration thresholds (not validated)")
         print(f"  Dossier ID: {dossier.dossier_id} | Urgency: [{dossier.overall_urgency.value}]")
         print("=" * 80)
         for a in dossier.alerts:
@@ -100,6 +100,9 @@ def main(argv=None):
     if args.command == "batch":
         in_path = _resolve_safe_path(args.input, must_exist=True)
         out_path = _resolve_safe_path(args.output, must_exist=False)
+        if in_path == out_path:
+            print("Error: Input and output CSV paths must differ.", file=sys.stderr)
+            return 1
 
         with open(in_path, mode="r", encoding="utf-8-sig") as f:
             reader = csv.DictReader(f)
@@ -125,7 +128,20 @@ def main(argv=None):
                     is_critical_flag=r.get("is_critical_flag", "").lower() in ("true", "1", "yes"),
                 )
                 dossier = supervisor.process_task(payload)
-                row_dict = dict(r)
+                # Prevent formula execution if a downstream user opens CSV in Excel.
+                # Preserve conventional signed numeric literals.
+                def spreadsheet_safe(value):
+                    import re
+                    if not isinstance(value, str):
+                        return value
+                    trimmed = value.lstrip()
+                    if trimmed.startswith(("=", "+", "-", "@")) and not re.fullmatch(
+                        r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?", trimmed
+                    ):
+                        return "'" + value
+                    return value
+
+                row_dict = {key: spreadsheet_safe(value) for key, value in r.items()}
                 row_dict["overall_urgency"] = dossier.overall_urgency.value
                 row_dict["integrity_status"] = dossier.integrity_status.value
                 row_dict["total_alerts"] = dossier.total_alerts

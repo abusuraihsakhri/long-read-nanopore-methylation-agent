@@ -1,9 +1,10 @@
 """
 Data Models & Telemetry Definitions for NanoMethyl Sentinel: 5mC / 5hmC Oxford Nanopore Current Trace Agent.
 Domain: Biomedical Scientific Discovery & Multi-Omics
-Standard: Oxford Nanopore Epigenomic Modification Specs
+Standard: Demonstration thresholds (not a validated ONT specification)
 """
 import datetime
+import math
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Any
@@ -26,6 +27,12 @@ class FrontierPayload:
     attributes: Dict[str, Any] = field(default_factory=dict)
     timestamp: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
 
+    def __post_init__(self):
+        for name in ("primary_metric", "secondary_metric"):
+            value = getattr(self, name)
+            if not isinstance(value, (int, float)) or not math.isfinite(value):
+                raise ValueError(f"{name} must be a finite number")
+
 
 @dataclass
 class AgentTelemetryAlert:
@@ -35,7 +42,7 @@ class AgentTelemetryAlert:
     summary: str
     technical_details: str
     actionable_remediation: str
-    standard_reference: str = "Oxford Nanopore Epigenomic Modification Specs"
+    standard_reference: str = "Demonstration thresholds (not a validated ONT specification)"
     timestamp: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
 
     def to_dict(self) -> Dict[str, Any]:

@@ -42,3 +42,19 @@ def test_coordinator():
 def test_cli():
     assert main(["audit", "--task-id", "CLI-01"]) == 0
     assert main(["chat", "What", "is", "the", "system", "status?"]) == 0
+
+def test_batch_overwrite_protection_and_formula_escaping():
+    base = Path(__file__).parent.parent
+    inp = base / "_test_batch_nano_input.csv"
+    out = base / "_test_batch_nano_output.csv"
+    inp.write_text(
+        "task_id,target_identifier,primary_metric,secondary_metric,status_descriptor\n"
+        "TASK-N,=HYPERLINK(1),12,2,NOMINAL\n", encoding="utf-8"
+    )
+    try:
+        assert main(["batch", "-i", str(inp), "-o", str(inp)]) == 1
+        assert main(["batch", "-i", str(inp), "-o", str(out)]) == 0
+        assert "'=HYPERLINK(1)" in out.read_text(encoding="utf-8")
+    finally:
+        inp.unlink(missing_ok=True)
+        out.unlink(missing_ok=True)

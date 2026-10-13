@@ -1,7 +1,7 @@
 """
 Core Algorithmic Engine & Cryptographic / Biological Logic for NanoMethyl Sentinel: 5mC / 5hmC Oxford Nanopore Current Trace Agent.
 Domain: Biomedical Scientific Discovery & Multi-Omics
-Standard: Oxford Nanopore Epigenomic Modification Specs
+Standard: Demonstration thresholds (not a validated ONT specification)
 """
 import math
 from typing import Dict, Any, List, Optional
@@ -9,7 +9,7 @@ from .models import FrontierPayload, AgentTelemetryAlert, ExecutionStatus
 
 
 class FrontierDomainEngine:
-    STANDARD = "Oxford Nanopore Epigenomic Modification Specs"
+    STANDARD = "Demonstration thresholds (not a validated ONT specification)"
     PRIMARY_BOUND = 25.0
     SECONDARY_BOUND = 10.0
 
@@ -18,7 +18,7 @@ class FrontierDomainEngine:
         if value > cls.PRIMARY_BOUND:
             return {
                 "summary": "Primary Domain Boundary Deviation",
-                "details": f"Parameter value ({value:.3f}) exceeds operational threshold ({cls.PRIMARY_BOUND:.1f}) under Oxford Nanopore Epigenomic Modification Specs.",
+                "details": f"Parameter value ({value:.3f}) exceeds operational threshold ({cls.PRIMARY_BOUND:.1f}) under Demonstration thresholds (not a validated ONT specification).",
                 "remediation": "Engage parameter recalibration and algorithmic verification routine.",
             }
         return None
@@ -39,7 +39,7 @@ class FrontierDomainEngine:
         if any(flag in desc_upper for flag in ["VIOLATION", "DISCORDANT", "ANOMALY", "MUTANT", "LEAK"]):
             return {
                 "summary": "Specification / Protocol Anomaly Identified",
-                "details": f"Telemetry status flag '{descriptor}' violates Oxford Nanopore Epigenomic Modification Specs conformance matrix.",
+                "details": f"Telemetry status flag '{descriptor}' violates Demonstration thresholds (not a validated ONT specification) conformance matrix.",
                 "remediation": "Execute automated rollback or secondary consensus verification.",
             }
         return None

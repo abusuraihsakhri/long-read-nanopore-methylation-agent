@@ -75,5 +75,5 @@ class SystemSupervisor:
 
     def query_supervisory_chat(self, query: str) -> str:
         PHIGuard.assert_no_phi(query)
-        prompt = f"Supervisor inquiry for Long Read Nanopore Methylation Agent under CAP / CLSI / ISO Standards: {query}"
+        prompt = f"Supervisor inquiry for Long Read Nanopore Methylation Agent using demonstration thresholds: {query}"
         return self.llm.invoke(prompt)

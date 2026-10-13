@@ -53,7 +53,7 @@ def main(argv=None):
         dossier = coordinator.process(payload)
         print("=" * 80)
         print(f"  NANOMETHYL SENTINEL: 5MC / 5HMC OXFORD NANOPORE CURRENT TRACE AGENT")
-        print(f"  Domain: Biomedical Scientific Discovery & Multi-Omics | Standard: Oxford Nanopore Epigenomic Modification Specs")
+        print(f"  Domain: Biomedical Scientific Discovery & Multi-Omics | Standard: Repository demonstration thresholds (not validated)")
         print(f"  Task: {dossier['task_id']} | Status: [{dossier['overall_status']}] | Total Alerts: {dossier['total_alerts']}")
         print("=" * 80)
         for a in dossier["alerts"]:
@@ -72,6 +72,9 @@ def main(argv=None):
     if args.command == "batch":
         in_path = Path(args.input).resolve()
         out_path = Path(args.output).resolve()
+        if in_path == out_path:
+            print("Error: Batch input and output files must differ.", file=sys.stderr)
+            return 1
         cwd = Path.cwd().resolve()
         # Path traversal protection: ensure paths stay within working directory
         try:
@@ -104,7 +107,18 @@ def main(argv=None):
                     is_critical_flag=str(r.get("is_critical_flag", "")).lower() in ("true", "1", "yes"),
                 )
                 dossier = coordinator.process(payload)
-                row_dict = dict(r)
+                def spreadsheet_safe(value):
+                    import re
+                    if not isinstance(value, str):
+                        return value
+                    trimmed = value.lstrip()
+                    if trimmed.startswith(("=", "+", "-", "@")) and not re.fullmatch(
+                        r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?", trimmed
+                    ):
+                        return "'" + value
+                    return value
+
+                row_dict = {key: spreadsheet_safe(value) for key, value in r.items()}
                 row_dict["overall_status"] = dossier["overall_status"]
                 row_dict["total_alerts"] = dossier["total_alerts"]
                 row_dict["critical_count"] = dossier["critical_count"]

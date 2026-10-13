@@ -161,3 +161,18 @@ def test_batch_cli_with_invalid_rows():
             input_path.unlink()
         if output_path.exists():
             output_path.unlink()
+
+def test_audit_detects_tampered_metadata():
+    trail = AuditTrail(secret_key="test-key")
+    entry = trail.log("controller", "supervisor", "evaluation", {"status": "OK"})
+    assert trail.verify_integrity()
+    entry["actor"] = "attacker"
+    assert not trail.verify_integrity()
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_nonfinite_metrics_rejected(value):
+    with pytest.raises(Exception):
+        SystemTaskPayload(task_id="T1", target_identifier="KEY-01", primary_metric=value)
+    with pytest.raises(Exception):
+        SystemTaskPayload(task_id="T1", target_identifier="KEY-01", primary_metric=1.0, secondary_metric=value)

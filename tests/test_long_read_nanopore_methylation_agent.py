@@ -176,3 +176,21 @@ def test_nonfinite_metrics_rejected(value):
         SystemTaskPayload(task_id="T1", target_identifier="KEY-01", primary_metric=value)
     with pytest.raises(Exception):
         SystemTaskPayload(task_id="T1", target_identifier="KEY-01", primary_metric=1.0, secondary_metric=value)
+
+def test_batch_prevents_overwriting_input_and_csv_formulas(tmp_path):
+    project_dir = Path(__file__).parent.parent
+    source = project_dir / "_test_batch_injection.csv"
+    output = project_dir / "_test_batch_injection_output.csv"
+    source.write_text(
+        "task_id,target_identifier,primary_metric,secondary_metric,status_descriptor\n"
+        "TASK-X,=HYPERLINK(1),12,2,NOMINAL\n",
+        encoding="utf-8",
+    )
+    try:
+        assert main(["batch", "-i", str(source), "-o", str(source)]) == 1
+        assert source.exists()
+        assert main(["batch", "-i", str(source), "-o", str(output)]) == 0
+        assert "'=HYPERLINK(1)" in output.read_text(encoding="utf-8")
+    finally:
+        source.unlink(missing_ok=True)
+        output.unlink(missing_ok=True)

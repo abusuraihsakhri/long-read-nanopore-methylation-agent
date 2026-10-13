@@ -72,6 +72,9 @@ def main(argv=None):
     if args.command == "batch":
         in_path = Path(args.input).resolve()
         out_path = Path(args.output).resolve()
+        if in_path == out_path:
+            print("Error: Batch input and output files must differ.", file=sys.stderr)
+            return 1
         cwd = Path.cwd().resolve()
         # Path traversal protection: ensure paths stay within working directory
         try:
